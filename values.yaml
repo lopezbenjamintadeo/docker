@@ -222,3 +222,19 @@ angular:
   serviceAccount:
     create: false
     name: default
+  env:
+
+redis:
+  image:
+    repository: docker.io/bitnami/redis
+    tag: 5.0.7-debian-10-r32
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 6379
