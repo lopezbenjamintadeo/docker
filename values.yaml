@@ -11,46 +11,6 @@ shared:
   env:
     - name: ENVIRONMENT
       value: worldsys
-    # - name: CONNECTIONSTRINGS__ADMIN
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "connection-string-admin"
-    # - name: CONNECTIONSTRINGS__DEFAULT
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "connection-string-default"
-    # - name: ABP__REDIS_CACHE__CONNECTIONSTRING
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "redis-connection-string"
-    # - name: FILE_CONFIGURATION__BLOB_STORAGE__STORAGE_ACCOUNT
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "blob-storage-account"
-    # - name: FILE_CONFIGURATION__BLOB_STORAGE__ACCESS_KEY
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "blob-storage-access-key"
-    # - name: FILE_CONFIGURATION__BLOB_STORAGE__STORAGE_ACCOUNT_BACKUP
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "blob-storage-account-backup"
-    # - name: FILE_CONFIGURATION__BLOB_STORAGE__ACCESS_KEY_BACKUP
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "blob-storage-access-key-backup"
-    # - name: APPLICATION_INSIGHTS__CONNECTION_STRING
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name: "my-secret"
-    #       key: "application-insights-connection-string"
   labels:
     app.kubernetes.io/managed-by: "Helm"
   logs:
@@ -223,18 +183,3 @@ angular:
     create: false
     name: default
   env:
-
-redis:
-  image:
-    repository: docker.io/bitnami/redis
-    tag: 5.0.7-debian-10-r32
-  auth:
-    enabled: false
-  master:
-    persistence:
-      enabled: true
-      size: 8Gi
-  replicas: 1
-  service:
-    type: ClusterIP
-    port: 6379
