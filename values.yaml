@@ -1,0 +1,240 @@
+shared:
+  imagePullSecrets:
+    - name: acr-worldsys
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: true
+    runAsUser: 0
+  service:
+    type: ClusterIP
+  environment: worldsys
+  env:
+    - name: ENVIRONMENT
+      value: worldsys
+    # - name: CONNECTIONSTRINGS__ADMIN
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "connection-string-admin"
+    # - name: CONNECTIONSTRINGS__DEFAULT
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "connection-string-default"
+    # - name: ABP__REDIS_CACHE__CONNECTIONSTRING
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "redis-connection-string"
+    # - name: FILE_CONFIGURATION__BLOB_STORAGE__STORAGE_ACCOUNT
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "blob-storage-account"
+    # - name: FILE_CONFIGURATION__BLOB_STORAGE__ACCESS_KEY
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "blob-storage-access-key"
+    # - name: FILE_CONFIGURATION__BLOB_STORAGE__STORAGE_ACCOUNT_BACKUP
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "blob-storage-account-backup"
+    # - name: FILE_CONFIGURATION__BLOB_STORAGE__ACCESS_KEY_BACKUP
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "blob-storage-access-key-backup"
+    # - name: APPLICATION_INSIGHTS__CONNECTION_STRING
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "application-insights-connection-string"
+  labels:
+    app.kubernetes.io/managed-by: "Helm"
+  logs:
+    applicationInsights:
+      isEnabled: false
+      connectionString: ""
+    consoleEnabled: true
+    file:
+      isEnabled: false
+      fileName: ""
+    loki:
+      isEnabled: false
+      lokiServiceUrl: http://loki:3100
+    level: ERROR
+  databases:
+    default:
+      connectionString: "Server=tcp:144.22.137.124,1433;Initial Catalog=compliance-db;Persist Security Info=False;User ID=connectcmpo;Password=jWUzPyjF64%6y4;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;"
+    admin:
+      connectionString: "Server=tcp:144.22.137.124,1433;Initial Catalog=compliance-db;Persist Security Info=False;User ID=connectcmpo;Password=jWUzPyjF64%6y4;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;"
+  redis:
+    enabled: false
+    host: redis-master.default.svc.cluster.local
+    databaseId: 0
+  app:
+    serverRootAddress: "http://127.0.0.1:5000"
+    internalServerRootAddress: "http://127.0.0.1:5000"
+    clientRootAddress: "http://127.0.0.1:80"
+  fileConfiguration:
+    blobStorage:
+      isEnabled: false
+      storageAccount: ""
+      accessKey: ""
+      storageAccountBackup: ""
+      accessKeyBackup: ""
+    local:
+      sourceDirectory: /var/lib/compliance/files
+      backupDirectory: /var/lib/compliance/backups
+
+worker:
+  image:
+    repository: "crwsnonprodeastus001.azurecr.io"
+    name: "compliance-worker"
+    pullPolicy: Always
+    tag: "20240802.2"
+  replicas: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 80
+  service:
+    port: 8080
+  annotations:
+    traffic.sidecar.istio.io/excludeOutboundIPRanges: 0.0.0.0/0
+  serviceAccount:
+    create: false
+    name: default
+  env:
+
+host:
+  image:
+    repository: "crwsnonprodeastus001.azurecr.io"
+    name: "compliance-backend"
+    pullPolicy: Always
+    tag: "20240802.1"
+  replicas: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 80
+  app:
+    cacheJWTTokens: false
+  reCaptcha:
+    siteKey: 
+    secretKey: 
+  identityServer:
+    authority: 
+  authentication:
+    allowSocialLoginSettingsPerTenant: true
+    samlFederation:
+      isEnabled: true
+  healthChecks:
+    healthChecksEnabled: true
+  zohoEditor:
+    key: ""
+  service:
+    port: 5000
+  serviceAccount:
+    create: false
+    name: default
+  env:
+    - name: ASPNETCORE_URLS
+      value: http://+:5000
+
+database:
+  image:
+    repository: "crwsnonprodeastus001.azurecr.io"
+    name: "compliance-database"
+    pullPolicy: Always
+    tag: "20240802.1"
+  replicas: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+  annotations:
+    traffic.sidecar.istio.io/excludeOutboundIPRanges: 0.0.0.0/0
+    sidecar.istio.io/inject: "false"
+  serviceAccount:
+    create: false
+    name: default
+  env:
+    # - name: SEAL_SEED
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "seal-seed"
+    # - name: JWT_SEED
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: "my-secret"
+    #       key: "jwt-seed"
+  jwt_seed: "gsKnGZ041HLL4IM8"
+  seal_seed: "jkE49230Tf093b42"
+
+
+angular:
+  image:
+    repository: "crwsnonprodeastus001.azurecr.io"
+    name: "compliance-frontend"
+    pullPolicy: Always
+    tag: "20240802.2"
+  replicas: 1
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "200Mi"
+    requests:
+      cpu: "50m"
+      memory: "100Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 1
+    targetMemoryUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 80
+  service:
+    port: 80
+  serviceAccount:
+    create: false
+    name: default
+  env:
+
+redis:
+  image:
+    repository: docker.io/bitnami/redis
+    tag: 5.0.7-debian-10-r32
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 6379
