@@ -77,6 +77,8 @@ worker:
     create: false
     name: default
   env:
+    - name: CONNECTIONSTRINGS__ADMIN
+       value: "database-connection-admin"
 
 host:
   image:
